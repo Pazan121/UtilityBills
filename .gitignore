@@ -487,5 +487,5 @@ $RECYCLE.BIN/
 *.user
 data/*.local.json
 
-# тека UntilityBills.App не є застосунком macOS, тож правило *.app її не стосується
-!UntilityBills.App/
+# тека UtilityBills.App не є застосунком macOS, тож правило *.app її не стосується
+!UtilityBills.App/

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\UntilityBills.Core\UntilityBills.Core.csproj" />
+    <ProjectReference Include="..\UtilityBills.Core\UtilityBills.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
