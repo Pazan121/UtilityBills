@@ -1,12 +1,12 @@
-using System.Text; 
-using UtilityBills.Core.Domain; 
+using System.Text;
+using UtilityBills.Core.Domain;
 
-Console.OutputEncoding = Encoding.UTF8; 
-var z = new zakaz("A-1001", "Іваненко"); 
-z.Add("SKU-1", 3, 250m); 
-z.Add("SKU-2", 12, 90m); 
-Console.WriteLine(z.ProcessData(false)); 
-Console.WriteLine(z.ProcessData(true)); 
-Console.WriteLine(z.Ck()); 
-Console.WriteLine(z.Chg(1)); 
-Console.Write(z.Rep()); 
+Console.OutputEncoding = Encoding.UTF8;
+var z = new Order("A-1001", "Іваненко");
+z.AddLine("SKU-1", 3, 250m);
+z.AddLine("SKU-2", 12, 90m);
+Console.WriteLine(z.CalculateTotal(false));
+Console.WriteLine(z.CalculateTotal(true));
+Console.WriteLine(z.IsValid());
+Console.WriteLine(z.TryChangeStatus(1));
+Console.Write(z.BuildReport());
