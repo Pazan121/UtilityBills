@@ -1,12 +1,23 @@
-using System.Text;
-using UtilityBills.Core.Domain;
+using UtilityBills.Core.Billing;
+using UtilityBills.Core.Reporting;
 
-Console.OutputEncoding = Encoding.UTF8;
-var z = new Order("A-1001", "Іваненко");
-z.AddLine("SKU-1", 3, 250m);
-z.AddLine("SKU-2", 12, 90m);
-Console.WriteLine(z.CalculateTotal(false));
-Console.WriteLine(z.CalculateTotal(true));
-Console.WriteLine(z.IsValid());
-Console.WriteLine(z.TryChangeStatus(1));
-Console.Write(z.BuildReport());
+BillTotalRequest request = BuildDemoRequest();
+BillTotalResult result = BillTotalCalculator.Calculate(request);
+string report = BillReport.TextOf(request, result);
+new BillReportPrinter(Console.Out).Print(report);
+
+static BillTotalRequest BuildDemoRequest()
+{
+    return new BillTotalRequest(
+        BillId: 1,
+        Subscriber: new SubscriberInfo("Іваненко", "i@ex.com", true),
+        Lines: new List<ChargeLine>
+        {
+            new() { ServiceCode = "WATER", Quantity = 12, Tariff = 100m },
+            new() { ServiceCode = "GAS", Quantity = 1, Tariff = 250m },
+        },
+        CreatedAt: new DateOnly(2026, 3, 10),
+        CouponCode: null,
+        Status: BillingStatus.Issued,
+        DeliveryPrice: 60m);
+}
