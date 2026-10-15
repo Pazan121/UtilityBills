@@ -173,32 +173,25 @@ public class Order
     }
 
     /// <summary>
-    /// Формує текстовий звіт за рахунком.
+    /// Формує детальний текстовий звіт по нарахуваннях у рахунку.
     /// </summary>
-    /// <returns>Текстовий звіт.</returns>
+    /// <returns>Багаторядковий рядок зі списком послуг та загальною сумою.</returns>
     public string BuildReport()
     {
-        StringBuilder report = new StringBuilder();
+        var report = new System.Text.StringBuilder();
+        var culture = System.Globalization.CultureInfo.CurrentCulture;
 
-        foreach (string[] line in _lines)
+        foreach (var line in _lines)
         {
-            int quantity = int.Parse(
-                line[1],
-                CultureInfo.InvariantCulture);
-
-            decimal tariff = decimal.Parse(
-                line[2],
-                CultureInfo.InvariantCulture);
-
+            int quantity = int.Parse(line[1], System.Globalization.CultureInfo.InvariantCulture);
+            decimal tariff = decimal.Parse(line[2], System.Globalization.CultureInfo.InvariantCulture);
             decimal amount = quantity * tariff;
 
-            report.AppendLine(
-                $"Послуга: {line[0]}; кількість: {quantity}; " +
-                $"тариф: {tariff}; сума: {amount}");
+            // Передаємо culture першим аргументом, щоб задовольнити CA1305 і зберегти кому для чисел
+            report.AppendLine(culture, $"Послуга: {line[0]}; кількість: {quantity}; тариф: {tariff}; сума: {amount}");
         }
 
-        report.AppendLine($"Разом: {CalculateTotal(false)}");
-
+        report.AppendLine(culture, $"Разом: {CalculateTotal(false)}");
         return report.ToString();
     }
 }
