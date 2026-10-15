@@ -11,6 +11,7 @@ csharp_new_line_before_open_brace = all
 csharp_prefer_braces = true:warning
 csharp_style_namespace_declarations = file_scoped:warning
 # Правила іменування
+dotnet_sort_system_directives_first = true
 dotnet_naming_rule.private_fields_should_be_camel_case.severity = warning
 dotnet_naming_symbols.private_fields.applicable_kinds = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private

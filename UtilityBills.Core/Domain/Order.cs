@@ -7,11 +7,18 @@ namespace UtilityBills.Core.Domain;
 // клас
 public class Order
 {
+    private readonly List<string[]> _lines = new List<string[]>();
+
+    public Order(string a, string b)
+    {
+        Id = a; // ставимо id
+        SubscriberName = b; // ставимо cl
+        CreatedAt = DateTime.Now; // ставимо дату
+    }
+
     public string Id { get; private set; }
 
     public string SubscriberName { get; private set; }
-
-    private readonly List<string[]> _lines = new List<string[]>();
 
     public int Status { get; private set; } // 0-новий,1-оплач,2-відпр,3-скасов
 
@@ -19,13 +26,21 @@ public class Order
 
     // public string prim; // примітка, поки не треба
 
-    // конструктор
-    public Order(string a, string b)
+    // пошук
+    public static Order FindById(List<Order> bills, string billId)
     {
-        Id = a; // ставимо id
-        SubscriberName = b; // ставимо cl
-        CreatedAt = DateTime.Now; // ставимо дату
+        for (int i = 0; i < bills.Count; i++)
+        {
+            if (bills[i].Id == billId)
+            {
+                return bills[i];
+            }
+        }
+
+        return string.Empty;
     }
+
+    // конструктор
 
     // метод додавання
     public void AddLine(string serviceCode, int quantity, decimal tariff)
@@ -58,13 +73,11 @@ public class Order
             total = total * 0.9m;
         }
         else if (total > 5000)
-{
-    total = total * 0.85m;
-}
+        {
+            total = total * 0.85m;
+        }
         else
-{
-    total = total;
-}
+
         if (lineCount > 10)
         {
             total = total - 100;
@@ -82,14 +95,23 @@ public class Order
     // міняємо статус
     public bool TryChangeStatus(int newStatus)
     {
-        if (Status == 0 && newStatus == 1) { Status = 1;
-            return true; }
+        if (Status == 0 && newStatus == 1)
+        {
+            Status = 1;
+            return true;
+        }
 
-        if (Status == 1 && newStatus == 2) { Status = 2;
-            return true; }
+        if (Status == 1 && newStatus == 2)
+        {
+            Status = 2;
+            return true;
+        }
 
-        if (Status == 0 && newStatus == 3) { Status = 3;
-            return true; }
+        if (Status == 0 && newStatus == 3)
+        {
+            Status = 3;
+            return true;
+        }
 
         return false; // не можна
     }
@@ -98,41 +120,33 @@ public class Order
     public bool IsValid()
     {
         // ДОВГИЙ РЯДОК 2: наступні 2 рядки склеїти в один
-        if (Id != null && Id != string.Empty && SubscriberName != null && SubscriberName.Length > 2 && _lines.Count > 0 && _lines.Count < 100 && Status >= 0 && Status <= 3)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return Id != null &&
+           Id != string.Empty &&
+           SubscriberName != null &&
+           SubscriberName.Length > 2 &&
+           _lines.Count > 0 &&
+           _lines.Count < 100 &&
+           Status >= 0 &&
+           Status <= 3;
     }
 
     // звіт
     public string BuildReport()
     {
-        string s = string.Empty;
-        for (int i = 0; i < _lines.Count; i++)
+        var report = new System.Text.StringBuilder();
+        var culture = System.Globalization.CultureInfo.InvariantCulture;
+
+        foreach (var line in _lines)
         {
-            // ДОВГИЙ РЯДОК 3: наступні 3 рядки склеїти в один
-            s = s + "Товар: " + _lines[i][0] + "; кількість: " + _lines[i][1] + "; ціна: " + _lines[i][2] + "; сума: " + (int.Parse(_lines[i][1]) * decimal.Parse(_lines[i][2])) + "\n";
+            int quantity = int.Parse(line[1], culture);
+            decimal tariff = decimal.Parse(line[2], culture);
+            decimal amount = quantity * tariff;
+
+            report.AppendLine(
+                $"Товар: {line[0]}; кількість: {quantity}; ціна: {tariff}; сума: {amount}");
         }
 
-        s = s + "Разом: " + CalculateTotal(false) + "\n";
-        return s; // повертаємо s
-    }
-
-    // пошук
-    public static Order FindById(List<Order> bills, string billId)
-    {
-        for (int i = 0; i < bills.Count; i++)
-        {
-            if (bills[i].Id == billId)
-            {
-                return bills[i];
-            }
-        }
-
-        return null;
+        report.AppendLine($"Разом: {CalculateTotal(false)}");
+        return report.ToString();
     }
 }
