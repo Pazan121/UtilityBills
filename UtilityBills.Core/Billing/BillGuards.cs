@@ -54,4 +54,18 @@ public static class BillGuards
             EnsureLineValid(line);
         }
     }
+
+    /// <summary>Перевіряє запит на розрахунок цілком.</summary>
+    /// <param name="request">Запит на розрахунок.</param>
+    public static void EnsureRequestValid(BillTotalRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Subscriber);
+        EnsureHeaderValid(
+            request.BillId,
+            request.Subscriber.Name,
+            request.Subscriber.Email);
+        EnsureLinesValid(request.Lines);
+        ArgumentOutOfRangeException.ThrowIfNegative(request.DeliveryPrice);
+    }
 }

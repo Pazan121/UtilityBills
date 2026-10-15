@@ -3,59 +3,24 @@ namespace UtilityBills.Core.Billing;
 /// <summary>Розрахунок підсумку рахунку з набору коротких підпрограм.</summary>
 public static class BillTotalCalculator
 {
-    /// <summary>
-    /// Тимчасовий диспетчер обробки рахунку.
-    /// </summary>
-    /// <param name="billId">Ідентифікатор рахунку.</param>
-    /// <param name="subscriberName">Ім'я абонента.</param>
-    /// <param name="subscriberEmail">Email абонента.</param>
-    /// <param name="isRegular">Ознака постійного клієнта.</param>
-    /// <param name="lines">Список рядків нарахувань.</param>
-    /// <param name="createdAt">Дата створення рахунку.</param>
-    /// <param name="couponCode">Код купона.</param>
-    /// <param name="status">Поточний стан рахунку.</param>
-    /// <param name="printToConsole">Чи виводити інформацію в консоль.</param>
-    /// <param name="deliveryPrice">Вартість доставки.</param>
-    /// <param name="newStatus">Новий стан рахунку після обробки.</param>
-    /// <returns>Підсумкова сума рахунку.</returns>
-    public static decimal Process(
-        int billId,
-        string subscriberName,
-        string subscriberEmail,
-        bool isRegular,
-        IReadOnlyList<ChargeLine> lines,
-        DateOnly createdAt,
-        string couponCode,
-        BillingStatus status,
-        bool printToConsole,
-        decimal deliveryPrice,
-        out BillingStatus newStatus)
+    /// <summary>Обчислює підсумок рахунку та його наступний стан.</summary>
+    /// <param name="request">Запит на розрахунок.</param>
+    /// <returns>Підсумок і новий стан рахунку.</returns>
+    public static BillTotalResult Calculate(BillTotalRequest request)
     {
-        BillGuards.EnsureHeaderValid(billId, subscriberName, subscriberEmail);
-        decimal total = SubtotalOf(lines);
-        total -= ClientDiscountOf(total, isRegular);
+        BillGuards.EnsureRequestValid(request);
+        decimal total = SubtotalOf(request.Lines);
+        total -= ClientDiscountOf(total, request.Subscriber.IsRegular);
         total -= VolumeDiscountOf(total);
-        total -= CouponDiscountOf(total, couponCode);
-        total -= WeekendDiscountOf(total, createdAt);
-        total += DeliveryFeeOf(total, deliveryPrice);
-        total = status == BillingStatus.Cancelled
+        total -= CouponDiscountOf(total, request.CouponCode);
+        total -= WeekendDiscountOf(total, request.CreatedAt);
+        total += DeliveryFeeOf(total, request.DeliveryPrice);
+        total = request.Status == BillingStatus.Cancelled
             ? 0m
             : Math.Round(Math.Max(total, 0m), 2);
-        newStatus = NextStatusOf(status, total);
-        if (printToConsole)
-        {
-            Console.WriteLine("Рахунок № " + billId);
-            Console.WriteLine("Абонент: " + subscriberName);
-            foreach (ChargeLine line in lines)
-            {
-                Console.WriteLine(line.ServiceCode + " x " + line.Quantity);
-            }
-
-            Console.WriteLine("Разом: " + total);
-            Console.WriteLine("Стан: " + newStatus);
-        }
-
-        return total;
+        return new BillTotalResult(
+            total,
+            NextStatusOf(request.Status, total));
     }
 
     /// <summary>Сума рядків із гуртовою знижкою.</summary>
