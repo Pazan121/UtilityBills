@@ -3,18 +3,18 @@ namespace UtilityBills.Core.Domain;
 /// <summary>Стан рахунку за комунальні послуги.</summary>
 public enum BillStatus
 {
-    /// <inheritdoc/>
+    /// <summary>Чернетка: рядки ще можна додавати.</summary>
     Draft = 0,
 
-    /// <inheritdoc/>
+    /// <summary>Рахунок виставлено абоненту.</summary>
     Issued = 1,
 
-    /// <inheritdoc/>
+    /// <summary>Рахунок оплачено.</summary>
     Paid = 2,
 
-    /// <inheritdoc/>
+    /// <summary>Строк оплати минув.</summary>
     Overdue = 3,
 
-    /// <inheritdoc/>
+    /// <summary>Рахунок скасовано.</summary>
     Cancelled = 4,
 }
