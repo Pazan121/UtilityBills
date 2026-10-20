@@ -1,23 +1,17 @@
-using UtilityBills.Core.Billing;
-using UtilityBills.Core.Reporting;
+// Тимчасовий Program.cs із завдання 4 (до INotifier).
+using System.Globalization;
+using UtilityBills.Core.Abstractions;
+using UtilityBills.Core.Domain;
+using UtilityBills.Core.Pricing;
+using UtilityBills.Core.Services;
+using UtilityBills.Core.Storage;
 
-BillTotalRequest request = BuildDemoRequest();
-BillTotalResult result = BillTotalCalculator.Calculate(request);
-string report = BillReport.TextOf(request, result);
-new BillReportPrinter(Console.Out).Print(report);
+InMemoryBillRepository repository = new();
+IPricingPolicy pricing = new DiscountPricingPolicy(0.05m);
+BillService service = new(repository, pricing);
 
-static BillTotalRequest BuildDemoRequest()
-{
-    return new BillTotalRequest(
-        BillId: 1,
-        Subscriber: new SubscriberInfo("Іваненко", "i@ex.com", true),
-        Lines: new List<ChargeLine>
-        {
-            new() { ServiceCode = "WATER", Quantity = 12, Tariff = 100m },
-            new() { ServiceCode = "GAS", Quantity = 1, Tariff = 250m },
-        },
-        CreatedAt: new DateOnly(2026, 3, 10),
-        CouponCode: null,
-        Status: BillingStatus.Issued,
-        DeliveryPrice: 60m);
-}
+UtilityBill bill = new(1, 1, "2026-10", new DateOnly(2026, 11, 20));
+bill.AddLine(new UtilityBillLine(1, 20m, 25m));
+service.Place(bill);
+string total = service.TotalOf(bill).ToString("0.00", CultureInfo.CurrentCulture);
+Console.WriteLine($"Сума: {total}");
