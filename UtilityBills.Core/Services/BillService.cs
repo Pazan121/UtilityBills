@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using UtilityBills.Core.Abstractions;
@@ -66,6 +67,7 @@ public sealed class BillService
     {
         ArgumentNullException.ThrowIfNull(bill);
         ArgumentNullException.ThrowIfNull(subscriber);
+        using IDisposable? scope = _log.BeginScope("Bill:{BillId}", bill.Id);
         if (subscriber.Id != bill.SubscriberId)
         {
             throw new ArgumentException(
@@ -91,6 +93,7 @@ public sealed class BillService
         _notifier.Notify(
             subscriber.Email,
             $"Рахунок № {bill.Id}: {amount} грн");
+        _log.LogInformation("Рахунок виставлено на {Amount}", total);
         return total;
     }
 
@@ -119,6 +122,8 @@ public sealed class BillService
     /// <param name="amount">Сплачена сума.</param>
     public void Pay(int billId, decimal amount)
     {
+        using IDisposable? scope = _log.BeginScope("Bill:{BillId}", billId);
+        _log.LogDebug("Початок оплати, сума {Amount}", amount);
         UtilityBill bill = _repository.GetById(billId)
             ?? throw new DomainRuleException(
                 "bill.exists",
@@ -138,7 +143,13 @@ public sealed class BillService
                 $"Сплачено {amount}, треба {total}");
         }
 
+        if (amount > total)
+        {
+            _log.LogWarning("Переплата {Extra}", amount - total);
+        }
+
         bill.Pay();
+        _log.LogInformation("Оплачено на {Amount}", amount);
     }
 
     /// <summary>Повертає рахунок або кидає DomainRuleException, якщо його немає.</summary>
@@ -158,6 +169,7 @@ public sealed class BillService
     public void Cancel(int billId, string reason)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        using IDisposable? scope = _log.BeginScope("Bill:{BillId}", billId);
         try
         {
             UtilityBill bill = Load(billId);
@@ -169,6 +181,7 @@ public sealed class BillService
             }
 
             bill.Cancel();
+            _log.LogInformation("Рахунок скасовано, причина: {Reason}", reason);
         }
         catch (IOException ex)
         {
@@ -189,6 +202,7 @@ public sealed class BillService
             total += _pricing.PriceOf(line);
         }
 
+        Debug.Assert(total >= 0m, "Підсумок рахунку не може бути від’ємним");
         return total;
     }
 
@@ -201,5 +215,5 @@ public sealed class BillService
         writer.WriteLine(TotalOf(bill));
         writer.Close();
     }
-#pragma warning restore CS1591, CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
+#pragma warning restore CS1591, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
 }

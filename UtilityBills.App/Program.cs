@@ -65,6 +65,7 @@ static void RunApplication(string[] args, ILoggerFactory factory)
     ReadLines(service, bill.Id);
 
     decimal total = service.Place(bill, subscriber);
+    service.Pay(bill.Id, total + 10m);
     Console.WriteLine($"Сума: {total.ToString("0.00", CultureInfo.CurrentCulture)}");
 }
 
