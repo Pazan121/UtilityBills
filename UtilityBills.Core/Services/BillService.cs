@@ -44,8 +44,19 @@ public sealed class BillService
                 nameof(subscriber));
         }
 
+        if (bill.Lines.Count == 0)
+        {
+            throw new DomainRuleException(
+                "bill.empty",
+                "Рахунок не містить жодного рядка");
+        }
+
         bill.Issue();
-        _repository.Add(bill);
+        if (_repository.GetById(bill.Id) is null)
+        {
+            _repository.Add(bill);
+        }
+
         decimal total = TotalOf(bill);
         string amount = total.ToString("0.00", CultureInfo.CurrentCulture);
         _notifier.Notify(
