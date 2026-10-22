@@ -1,9 +1,9 @@
-// Проміжна версія завдань 5–6: логер і верхній обробник, але ще без аудиту та експорту.
 #pragma warning disable CA1031 // Верхній обробник — єдине місце, де дозволено catch (Exception).
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using UtilityBills.App;
 using UtilityBills.Core.Abstractions;
+using UtilityBills.Core.Auditing;
 using UtilityBills.Core.Domain;
 using UtilityBills.Core.Errors;
 using UtilityBills.Core.Pricing;
@@ -57,16 +57,19 @@ static void RunApplication(string[] args, ILoggerFactory factory)
         pricing,
         notifier,
         factory.CreateLogger<BillService>());
+    using FileAuditLog audit = new("audit.log");
 
     Subscriber subscriber = new(1, "Іваненко Іван", "Київ, вул. Вишнева, 1", "ivan@example.com");
     UtilityBill bill = new(1, subscriber.Id, "2026-10", new DateOnly(2026, 11, 20));
     repository.Add(bill);
+    audit.Write("Open", bill.Id);
 
     ReadLines(service, bill.Id);
 
     decimal total = service.Place(bill, subscriber);
-    service.Pay(bill.Id, total + 10m);
+    audit.Write("Place", bill.Id);
     Console.WriteLine($"Сума: {total.ToString("0.00", CultureInfo.CurrentCulture)}");
+    service.ExportReport("bill-report.txt", bill);
 }
 
 static void ReadLines(BillService service, int billId)

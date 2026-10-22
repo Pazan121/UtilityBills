@@ -190,6 +190,26 @@ public sealed class BillService
         }
     }
 
+    /// <summary>Записує звіт у файл; потік закривається навіть при винятку.</summary>
+    /// <param name="path">Шлях до файлу.</param>
+    /// <param name="bill">Рахунок.</param>
+    public void ExportReport(string path, UtilityBill bill)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(bill);
+        try
+        {
+            using StreamWriter writer = new(path);
+            writer.WriteLine($"Рахунок {bill.Id}");
+            writer.WriteLine(TotalOf(bill).ToString("0.00", CultureInfo.CurrentCulture));
+        }
+        catch (IOException ex)
+        {
+            _log.LogError(ex, "Не вдалося записати звіт {Path}", path);
+            throw;
+        }
+    }
+
     /// <summary>Обчислює суму рахунку за політикою ціноутворення.</summary>
     /// <param name="bill">Рахунок.</param>
     /// <returns>Сума рахунку.</returns>
@@ -205,15 +225,4 @@ public sealed class BillService
         Debug.Assert(total >= 0m, "Підсумок рахунку не може бути від’ємним");
         return total;
     }
-
-#pragma warning disable CS1591, CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
-    // ПОМИЛКА РЕСУРСІВ (завдання 7): при винятку файл лишається відкритим.
-    public void ExportReport(string path, UtilityBill bill)
-    {
-        StreamWriter writer = new StreamWriter(path);
-        writer.WriteLine($"Рахунок {bill.Id}");
-        writer.WriteLine(TotalOf(bill));
-        writer.Close();
-    }
-#pragma warning restore CS1591, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
 }
