@@ -1,6 +1,7 @@
 using System.Globalization;
 using UtilityBills.Core.Abstractions;
 using UtilityBills.Core.Domain;
+using UtilityBills.Core.Errors;
 
 namespace UtilityBills.Core.Services;
 
@@ -53,6 +54,26 @@ public sealed class BillService
         return total;
     }
 
+    /// <summary>Додає типізований рядок до чернетки рахунку.</summary>
+    /// <param name="billId">Номер рахунку.</param>
+    /// <param name="line">Рядок рахунку.</param>
+    public void AddLine(int billId, UtilityBillLine line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        UtilityBill bill = _repository.GetById(billId)
+            ?? throw new DomainRuleException(
+                "bill.exists",
+                $"Рахунок {billId} не знайдено");
+        if (bill.Status != BillStatus.Draft)
+        {
+            throw new DomainRuleException(
+                "bill.editable",
+                $"Стан {bill.Status} не дозволяє додавати рядки");
+        }
+
+        bill.AddLine(line);
+    }
+
     /// <summary>Обчислює суму рахунку за політикою ціноутворення.</summary>
     /// <param name="bill">Рахунок.</param>
     /// <returns>Сума рахунку.</returns>
@@ -68,7 +89,7 @@ public sealed class BillService
         return total;
     }
 
-#pragma warning disable CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
+#pragma warning disable CS1591, CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
     // АНТИПАТЕРН 4 (завдання 5): try/catch замість звичайної умови.
     public static int CountValidQuantities(string[] rows)
     {
@@ -90,15 +111,6 @@ public sealed class BillService
         }
 
         return valid;
-    }
-
-    // АНТИПАТЕРН (завдання 2): ядро само розбирає рядки.
-    public void AddLine(int billId, string serviceId, string quantity, string tariff)
-    {
-        UtilityBill bill = _repository.GetById(billId);
-        decimal q = decimal.Parse(quantity);
-        decimal p = decimal.Parse(tariff);
-        bill.AddLine(new UtilityBillLine(int.Parse(serviceId), q, p));
     }
 
     // АНТИПАТЕРН (завдання 3): коди повернення без назв і сенсу.
