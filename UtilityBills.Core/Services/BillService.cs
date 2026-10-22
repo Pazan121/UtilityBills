@@ -74,6 +74,33 @@ public sealed class BillService
         bill.AddLine(line);
     }
 
+    /// <summary>Фіксує оплату рахунку; порушення правил — DomainRuleException.</summary>
+    /// <param name="billId">Номер рахунку.</param>
+    /// <param name="amount">Сплачена сума.</param>
+    public void Pay(int billId, decimal amount)
+    {
+        UtilityBill bill = _repository.GetById(billId)
+            ?? throw new DomainRuleException(
+                "bill.exists",
+                $"Рахунок {billId} не знайдено");
+        if (bill.Status != BillStatus.Issued && bill.Status != BillStatus.Overdue)
+        {
+            throw new DomainRuleException(
+                "bill.payable",
+                $"Стан {bill.Status} не дозволяє оплату");
+        }
+
+        decimal total = TotalOf(bill);
+        if (amount < total)
+        {
+            throw new DomainRuleException(
+                "bill.amount",
+                $"Сплачено {amount}, треба {total}");
+        }
+
+        bill.Pay();
+    }
+
     /// <summary>Обчислює суму рахунку за політикою ціноутворення.</summary>
     /// <param name="bill">Рахунок.</param>
     /// <returns>Сума рахунку.</returns>
@@ -111,29 +138,6 @@ public sealed class BillService
         }
 
         return valid;
-    }
-
-    // АНТИПАТЕРН (завдання 3): коди повернення без назв і сенсу.
-    public int Pay(int billId, decimal amount)
-    {
-        UtilityBill? bill = _repository.GetById(billId);
-        if (bill is null)
-        {
-            return -1;
-        }
-
-        if (bill.Status != BillStatus.Issued)
-        {
-            return -2;
-        }
-
-        if (amount < TotalOf(bill))
-        {
-            return -3;
-        }
-
-        bill.Pay();
-        return 0;
     }
 
     // АНТИПАТЕРН 1 (завдання 5): порожній catch і повернення null.
