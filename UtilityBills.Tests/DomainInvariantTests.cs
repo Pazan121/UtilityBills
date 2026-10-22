@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using UtilityBills.Core.Abstractions;
 using UtilityBills.Core.Domain;
 using UtilityBills.Core.Pricing;
@@ -34,7 +35,8 @@ public class DomainInvariantTests
         BillService service = new(
             new InMemoryBillRepository(),
             new DiscountPricingPolicy(0.10m),
-            new SilentNotifier());
+            new SilentNotifier(),
+            NullLogger<BillService>.Instance);
         UtilityBill bill = NewBill(2);
         bill.AddLine(new UtilityBillLine(1, 2m, 100m));
 

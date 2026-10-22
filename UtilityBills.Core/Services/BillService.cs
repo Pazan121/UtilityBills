@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 using UtilityBills.Core.Abstractions;
 using UtilityBills.Core.Domain;
 using UtilityBills.Core.Errors;
@@ -11,22 +12,50 @@ public sealed class BillService
     private readonly IBillRepository _repository;
     private readonly IPricingPolicy _pricing;
     private readonly INotifier _notifier;
+    private readonly ILogger<BillService> _log;
 
     /// <summary>Initializes a new instance of the <see cref="BillService"/> class.</summary>
     /// <param name="repository">Сховище рахунків.</param>
     /// <param name="pricing">Політика ціноутворення.</param>
     /// <param name="notifier">Спосіб сповіщення абонента.</param>
+    /// <param name="log">Журнал подій сервісу.</param>
     public BillService(
         IBillRepository repository,
         IPricingPolicy pricing,
-        INotifier notifier)
+        INotifier notifier,
+        ILogger<BillService> log)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(pricing);
         ArgumentNullException.ThrowIfNull(notifier);
+        ArgumentNullException.ThrowIfNull(log);
         _repository = repository;
         _pricing = pricing;
         _notifier = notifier;
+        _log = log;
+    }
+
+    /// <summary>Рахує рядки, що є цілими числами більше нуля.</summary>
+    /// <param name="rows">Рядки введення.</param>
+    /// <returns>Кількість коректних значень.</returns>
+    public static int CountValidQuantities(string[] rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        int valid = 0;
+        foreach (string row in rows)
+        {
+            if (int.TryParse(
+                    row,
+                    NumberStyles.Integer,
+                    CultureInfo.CurrentCulture,
+                    out int quantity)
+                && quantity > 0)
+            {
+                valid++;
+            }
+        }
+
+        return valid;
     }
 
     /// <summary>Виставляє рахунок, зберігає його та сповіщає абонента.</summary>
@@ -112,6 +141,42 @@ public sealed class BillService
         bill.Pay();
     }
 
+    /// <summary>Повертає рахунок або кидає DomainRuleException, якщо його немає.</summary>
+    /// <param name="billId">Номер рахунку.</param>
+    /// <returns>Знайдений рахунок.</returns>
+    public UtilityBill Load(int billId)
+    {
+        return _repository.GetById(billId)
+            ?? throw new DomainRuleException(
+                "bill.exists",
+                $"Рахунок {billId} не знайдено");
+    }
+
+    /// <summary>Скасовує рахунок; збій сховища логується й пробрасується далі.</summary>
+    /// <param name="billId">Номер рахунку.</param>
+    /// <param name="reason">Причина скасування.</param>
+    public void Cancel(int billId, string reason)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        try
+        {
+            UtilityBill bill = Load(billId);
+            if (bill.Status != BillStatus.Draft && bill.Status != BillStatus.Issued)
+            {
+                throw new DomainRuleException(
+                    "bill.cancellable",
+                    $"Стан {bill.Status} не дозволяє скасування");
+            }
+
+            bill.Cancel();
+        }
+        catch (IOException ex)
+        {
+            _log.LogError(ex, "Збій сховища, {BillId}", billId);
+            throw;
+        }
+    }
+
     /// <summary>Обчислює суму рахунку за політикою ціноутворення.</summary>
     /// <param name="bill">Рахунок.</param>
     /// <returns>Сума рахунку.</returns>
@@ -128,58 +193,6 @@ public sealed class BillService
     }
 
 #pragma warning disable CS1591, CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
-    // АНТИПАТЕРН 4 (завдання 5): try/catch замість звичайної умови.
-    public static int CountValidQuantities(string[] rows)
-    {
-        int valid = 0;
-        foreach (string row in rows)
-        {
-            try
-            {
-                int quantity = int.Parse(row);
-                if (quantity > 0)
-                {
-                    valid++;
-                }
-            }
-            catch (FormatException)
-            {
-                // не число — пропускаємо
-            }
-        }
-
-        return valid;
-    }
-
-    // АНТИПАТЕРН 1 (завдання 5): порожній catch і повернення null.
-    public UtilityBill? Load(int billId)
-    {
-        try
-        {
-            return _repository.GetById(billId);
-        }
-        catch (Exception)
-        {
-        }
-
-        return null;
-    }
-
-    // АНТИПАТЕРНИ 2 і 3 (завдання 5): широке перехоплення і throw ex.
-    public void Cancel(int billId, string reason)
-    {
-        try
-        {
-            UtilityBill bill = _repository.GetById(billId);
-            bill.Cancel();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Щось пішло не так");
-            throw ex;
-        }
-    }
-
     // ПОМИЛКА РЕСУРСІВ (завдання 7): при винятку файл лишається відкритим.
     public void ExportReport(string path, UtilityBill bill)
     {
@@ -188,5 +201,5 @@ public sealed class BillService
         writer.WriteLine(TotalOf(bill));
         writer.Close();
     }
-#pragma warning restore CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
+#pragma warning restore CS1591, CA1031, CA1305, CA2000, CA2200, CS8600, CS8602, IDE0060, SA1204
 }
