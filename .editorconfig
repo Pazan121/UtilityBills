@@ -44,3 +44,5 @@ dotnet_diagnostic.IDE0055.severity = warning
 dotnet_diagnostic.SA1648.severity = none
 # Імена тестів у форматі Метод_Сценарій_Результат містять підкреслення за загальною практикою.
 dotnet_diagnostic.CA1707.severity = none
+# Навчальний проєкт: LoggerMessage-делегати (CA1848) не вимагаємо.
+dotnet_diagnostic.CA1848.severity = none

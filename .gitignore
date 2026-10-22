@@ -489,3 +489,7 @@ data/*.local.json
 
 # тека UtilityBills.App не є застосунком macOS, тож правило *.app її не стосується
 !UtilityBills.App/
+
+# Журнали й звіти, які створює застосунок
+audit.log
+bill-report.txt
