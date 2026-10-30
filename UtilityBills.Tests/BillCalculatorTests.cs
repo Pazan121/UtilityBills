@@ -5,95 +5,43 @@ namespace UtilityBills.Tests;
 
 public class BillCalculatorTests
 {
-    [Fact]
-    public void ChargeFor_SmallBillNotPrivileged_ReturnsAmount()
+    [Theory]
+    [InlineData(0, false, 0)]
+    [InlineData(400, false, 400)]
+    [InlineData(400, true, 380)]
+    [InlineData(999.99, false, 999.99)]
+    [InlineData(1000, false, 900)]
+    [InlineData(1000, true, 850)]
+    [InlineData(1000.01, false, 900.01)]
+    [InlineData(1000.01, true, 850.01)]
+    public void ChargeFor_Boundaries_MatchesTable(
+        double amount, bool isPrivileged, double expected)
     {
         // Arrange
         var calculator = new BillCalculator();
 
         // Act
-        decimal actual = calculator.ChargeFor(400m, false);
+        decimal actual = calculator.ChargeFor(
+            (decimal)amount, isPrivileged);
 
         // Assert
-        Assert.Equal(400m, actual);
+        Assert.Equal((decimal)expected, actual);
     }
 
-    [Fact]
-    public void ChargeFor_NegativeAmount_ThrowsOutOfRange()
+    [Theory]
+    [InlineData(-0.01)]
+    [InlineData(-1000)]
+    public void ChargeFor_NegativeAmount_ThrowsOutOfRange(
+        double amount)
     {
         // Arrange
         var calculator = new BillCalculator();
 
         // Act
         var ex = Assert.Throws<ArgumentOutOfRangeException>(
-            () => calculator.ChargeFor(-0.01m, true));
+            () => calculator.ChargeFor((decimal)amount, true));
 
         // Assert
         Assert.Equal("amount", ex.ParamName);
-    }
-
-    [Fact]
-    public void ChargeFor_ZeroAmount_ReturnsZero()
-    {
-        // Arrange
-        var calculator = new BillCalculator();
-
-        // Act
-        decimal actual = calculator.ChargeFor(0m, false);
-
-        // Assert
-        Assert.Equal(0m, actual);
-    }
-
-    [Fact]
-    public void ChargeFor_SmallBillPrivileged_AppliesPrivilegedRate()
-    {
-        // Arrange
-        var calculator = new BillCalculator();
-
-        // Act
-        decimal actual = calculator.ChargeFor(400m, true);
-
-        // Assert
-        Assert.Equal(380m, actual);
-    }
-
-    [Fact]
-    public void ChargeFor_JustBelowBigBill_AppliesNoBigRate()
-    {
-        // Arrange
-        var calculator = new BillCalculator();
-
-        // Act
-        decimal actual = calculator.ChargeFor(999.99m, false);
-
-        // Assert
-        Assert.Equal(999.99m, actual);
-    }
-
-    [Fact]
-    public void ChargeFor_ExactlyBigBill_AppliesBigRate()
-    {
-        // Arrange
-        var calculator = new BillCalculator();
-
-        // Act
-        decimal actual = calculator.ChargeFor(1000m, false);
-
-        // Assert
-        Assert.Equal(900m, actual);
-    }
-
-    [Fact]
-    public void ChargeFor_ExactlyBigBillPrivileged_AppliesBothRates()
-    {
-        // Arrange
-        var calculator = new BillCalculator();
-
-        // Act
-        decimal actual = calculator.ChargeFor(1000m, true);
-
-        // Assert
-        Assert.Equal(850m, actual);
     }
 }
