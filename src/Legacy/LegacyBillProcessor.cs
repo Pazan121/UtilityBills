@@ -7,6 +7,9 @@ public class LegacyBillProcessor
 {
     private decimal _tmpSum;
     private decimal _tmpDiscount;
+    private readonly DiscountPolicy _discounts = new();
+    private readonly ShippingPolicy _shipping = new();
+    private readonly ReportBuilder _report = new();
     private readonly List<string> _log = new();
 
     public string Handle(int billId, int consumerId,
@@ -21,23 +24,11 @@ public class LegacyBillProcessor
         if (consumerMail is null || !consumerMail.Contains("@")) return "ERR: mail";
         _log.Add("ok " + billId);
         _tmpSum = Subtotal(lines);
-        _tmpDiscount = DiscountOf(_tmpSum, consumerKind, consumerDone);
-        decimal ship = ShippingOf(_tmpSum - _tmpDiscount);
+        _tmpDiscount = _discounts.For(_tmpSum, consumerKind, consumerDone);
+        decimal ship = _shipping.For(_tmpSum - _tmpDiscount);
         decimal total = _tmpSum - _tmpDiscount + ship;
-        string txt = "Документ #" + billId + "\n";
-        txt += "Клієнт: " + consumerName + "\n";
-        for (int i = 0; i < lines.Count; i++)
-        {
-            txt += lines[i].ServiceCode + " x" + lines[i].Quantity + " = " +
-                (lines[i].Quantity * lines[i].Tariff)
-                .ToString("0.00") + " " + currency + "\n";
-        }
-        txt += "Знижка: " + _tmpDiscount.ToString("0.00") +
-            " " + currency + "\n";
-        txt += "Доставка: " + ship.ToString("0.00") +
-            " " + currency + "\n";
-        txt += "Разом: " + total.ToString("0.00") +
-            " " + currency + "\n";
+        string txt = _report.Build(billId, consumerName, lines,
+            currency, _tmpDiscount, ship, total);
         if (sendMail)
         {
             _log.Add("mail -> " + consumerMail);
@@ -49,9 +40,9 @@ public class LegacyBillProcessor
         List<ServiceLine> lines)
     {
         decimal subtotal = Subtotal(lines);
-        decimal discount = DiscountOf(subtotal, consumerKind, consumerDone);
+        decimal discount = _discounts.For(subtotal, consumerKind, consumerDone);
         decimal payable = subtotal - discount;
-        return payable + ShippingOf(payable);
+        return payable + _shipping.For(payable);
     }
 
     public string DescribeClient(Consumer c)
@@ -80,34 +71,5 @@ public class LegacyBillProcessor
             sum += lines[i].Quantity * lines[i].Tariff;
         }
         return sum;
-    }
-
-    private static decimal DiscountOf(decimal subtotal,
-        ConsumerKind consumerKind, int consumerDone)
-    {
-        decimal discount = 0m;
-        if (consumerKind == ConsumerKind.Vip)
-        {
-            discount = subtotal * PricingRules.VipRate;
-            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
-        }
-        else if (consumerKind == ConsumerKind.Staff)
-        {
-            discount = subtotal * PricingRules.StaffRate;
-            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
-        }
-        else if (consumerDone > PricingRules.LoyalOrders)
-        {
-            discount = subtotal * PricingRules.LoyalRate;
-            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
-        }
-        return discount;
-    }
-
-    private static decimal ShippingOf(decimal payable)
-    {
-        decimal ship = 0m;
-        if (payable < PricingRules.FreeShipFrom) ship = PricingRules.ShipCost;
-        return ship;
     }
 }
