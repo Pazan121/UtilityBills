@@ -3,24 +3,6 @@ using System.Collections.Generic;
 
 namespace UtilityBills.Legacy;
 
-public class Consumer
-{
-    public int Id;
-    public string Name = "";
-    public string Email = "";
-    public string Kind = "regular";
-    public int DoneCount;
-    public DateTime SinceUtc;
-}
-
-public class ServiceLine
-{
-    public string ServiceCode = "";
-    public int Quantity;
-    public decimal Tariff;
-    public string Group = "";
-}
-
 public class LegacyBillProcessor
 {
     private decimal _tmpSum;
@@ -29,15 +11,15 @@ public class LegacyBillProcessor
 
     public string Handle(int billId, int consumerId,
         string consumerName, string? consumerMail,
-        string consumerKind, int consumerDone,
-        List<ServiceLine>? lines, string state,
+        ConsumerKind consumerKind, int consumerDone,
+        List<ServiceLine>? lines, BillState state,
         string currency, DateTime createdAt, bool sendMail)
     {
         if (lines != null)
         {
             if (lines.Count > 0)
             {
-                if (state == "new" || state == "paid")
+                if (state == BillState.New || state == BillState.Paid)
                 {
                     if (consumerMail != null &&
                         consumerMail.Contains("@"))
@@ -69,12 +51,12 @@ public class LegacyBillProcessor
             _tmpSum += lines[i].Quantity * lines[i].Tariff;
         }
         _tmpDiscount = 0m;
-        if (consumerKind == "vip")
+        if (consumerKind == ConsumerKind.Vip)
         {
             _tmpDiscount = _tmpSum * PricingRules.VipRate;
             if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
         }
-        else if (consumerKind == "staff")
+        else if (consumerKind == ConsumerKind.Staff)
         {
             _tmpDiscount = _tmpSum * PricingRules.StaffRate;
             if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
@@ -108,7 +90,7 @@ public class LegacyBillProcessor
         return txt;
     }
 
-    public decimal Preview(string consumerKind, int consumerDone,
+    public decimal Preview(ConsumerKind consumerKind, int consumerDone,
         List<ServiceLine> lines)
     {
         decimal s = 0m;
@@ -117,12 +99,12 @@ public class LegacyBillProcessor
             s += it.Quantity * it.Tariff;
         }
         decimal d = 0m;
-        if (consumerKind == "vip")
+        if (consumerKind == ConsumerKind.Vip)
         {
             d = s * PricingRules.VipRate;
             if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
         }
-        else if (consumerKind == "staff")
+        else if (consumerKind == ConsumerKind.Staff)
         {
             d = s * PricingRules.StaffRate;
             if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
@@ -140,7 +122,7 @@ public class LegacyBillProcessor
     public string DescribeClient(Consumer c)
     {
         string s = c.Name.Trim().ToUpper();
-        if (c.Kind == "vip") s += " [VIP]";
+        if (c.Kind == ConsumerKind.Vip) s += " [VIP]";
         if (c.DoneCount > PricingRules.LoyalOrders) s += " [ЛОЯЛЬНИЙ]";
         s += " <" + c.Email.ToLower() + ">";
         int years = DateTime.Now.Year - c.SinceUtc.Year;
