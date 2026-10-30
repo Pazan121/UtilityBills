@@ -4,20 +4,19 @@ namespace UtilityBills.Legacy;
 
 public sealed class ReportBuilder
 {
-    public string Build(int billId, string consumerName,
-        IReadOnlyList<ServiceLine> lines, string currency,
-        decimal discount, decimal shipping, decimal total)
+    public string Build(BillRequest req, decimal discount,
+        decimal shipping, decimal total)
     {
         var sb = new StringBuilder();
-        sb.Append("Документ #").Append(billId).Append('\n');
-        sb.Append("Клієнт: ").Append(consumerName).Append('\n');
-        foreach (var line in lines)
+        sb.Append("Документ #").Append(req.BillId).Append('\n');
+        sb.Append("Клієнт: ").Append(req.Client.Name).Append('\n');
+        foreach (var line in req.Lines!)
         {
-            sb.Append(Line(line, currency));
+            sb.Append(Line(line, req.Currency));
         }
-        sb.Append(Money("Знижка", discount, currency));
-        sb.Append(Money("Доставка", shipping, currency));
-        sb.Append(Money("Разом", total, currency));
+        sb.Append(Money("Знижка", discount, req.Currency));
+        sb.Append(Money("Доставка", shipping, req.Currency));
+        sb.Append(Money("Разом", total, req.Currency));
         return sb.ToString();
     }
 
