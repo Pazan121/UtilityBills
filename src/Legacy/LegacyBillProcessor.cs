@@ -15,36 +15,11 @@ public class LegacyBillProcessor
         List<ServiceLine>? lines, BillState state,
         string currency, DateTime createdAt, bool sendMail)
     {
-        if (lines != null)
-        {
-            if (lines.Count > 0)
-            {
-                if (state == BillState.New || state == BillState.Paid)
-                {
-                    if (consumerMail != null &&
-                        consumerMail.Contains("@"))
-                    {
-                        _log.Add("ok " + billId);
-                    }
-                    else
-                    {
-                        return "ERR: mail";
-                    }
-                }
-                else
-                {
-                    return "ERR: state";
-                }
-            }
-            else
-            {
-                return "ERR: empty";
-            }
-        }
-        else
-        {
-            return "ERR: null";
-        }
+        if (lines is null) return "ERR: null";
+        if (lines.Count == 0) return "ERR: empty";
+        if (state is not (BillState.New or BillState.Paid)) return "ERR: state";
+        if (consumerMail is null || !consumerMail.Contains("@")) return "ERR: mail";
+        _log.Add("ok " + billId);
         _tmpSum = 0m;
         for (int i = 0; i < lines.Count; i++)
         {
