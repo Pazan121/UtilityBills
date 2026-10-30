@@ -13,11 +13,21 @@ public sealed class BillCalculator
     /// <summary>Межа великого рахунку, грн.</summary>
     public const decimal BigBillFrom = 1000m;
 
-    /// <summary>Обчислює суму до сплати за сумою за тарифом і ознакою пільги.</summary>
+    /// <summary>Кількість копійок у гривні.</summary>
+    public const decimal CentsInHryvnia = 100m;
+
+    /// <summary>Обчислює суму до сплати; результат округлено до 0,01 грн угору.</summary>
     /// <param name="amount">Сума за тарифом до знижок, грн.</param>
     /// <param name="isPrivileged">Чи має споживач пільгу.</param>
     /// <returns>Сума до сплати, грн.</returns>
     public decimal ChargeFor(decimal amount, bool isPrivileged)
+    {
+        EnsureAmountIsValid(amount);
+        decimal raw = amount * (1m - RateFor(amount, isPrivileged));
+        return RoundUpToCent(raw);
+    }
+
+    private static void EnsureAmountIsValid(decimal amount)
     {
         if (amount < 0m)
         {
@@ -25,18 +35,21 @@ public sealed class BillCalculator
                 nameof(amount),
                 "Сума не може бути від’ємною.");
         }
+    }
 
-        decimal rate = 0m;
-        if (isPrivileged)
-        {
-            rate += PrivilegedRate;
-        }
-
+    private static decimal RateFor(decimal amount, bool isPrivileged)
+    {
+        decimal rate = isPrivileged ? PrivilegedRate : 0m;
         if (amount >= BigBillFrom)
         {
             rate += BigBillRate;
         }
 
-        return decimal.Ceiling(amount * (1m - rate) * 100m) / 100m;
+        return rate;
+    }
+
+    private static decimal RoundUpToCent(decimal value)
+    {
+        return decimal.Ceiling(value * CentsInHryvnia) / CentsInHryvnia;
     }
 }

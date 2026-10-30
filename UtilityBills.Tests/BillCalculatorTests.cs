@@ -14,6 +14,7 @@ public class BillCalculatorTests
     [InlineData(1000, true, 850)]
     [InlineData(1000.01, false, 900.01)]
     [InlineData(1000.01, true, 850.01)]
+    [InlineData(0.01, false, 0.01)]
     public void ChargeFor_Boundaries_MatchesTable(
         double amount, bool isPrivileged, double expected)
     {
