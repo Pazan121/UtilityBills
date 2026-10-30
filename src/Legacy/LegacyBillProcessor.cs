@@ -20,29 +20,9 @@ public class LegacyBillProcessor
         if (state is not (BillState.New or BillState.Paid)) return "ERR: state";
         if (consumerMail is null || !consumerMail.Contains("@")) return "ERR: mail";
         _log.Add("ok " + billId);
-        _tmpSum = 0m;
-        for (int i = 0; i < lines.Count; i++)
-        {
-            _tmpSum += lines[i].Quantity * lines[i].Tariff;
-        }
-        _tmpDiscount = 0m;
-        if (consumerKind == ConsumerKind.Vip)
-        {
-            _tmpDiscount = _tmpSum * PricingRules.VipRate;
-            if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
-        }
-        else if (consumerKind == ConsumerKind.Staff)
-        {
-            _tmpDiscount = _tmpSum * PricingRules.StaffRate;
-            if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
-        }
-        else if (consumerDone > PricingRules.LoyalOrders)
-        {
-            _tmpDiscount = _tmpSum * PricingRules.LoyalRate;
-            if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
-        }
-        decimal ship = 0m;
-        if (_tmpSum - _tmpDiscount < PricingRules.FreeShipFrom) ship = PricingRules.ShipCost;
+        _tmpSum = Subtotal(lines);
+        _tmpDiscount = DiscountOf(_tmpSum, consumerKind, consumerDone);
+        decimal ship = ShippingOf(_tmpSum - _tmpDiscount);
         decimal total = _tmpSum - _tmpDiscount + ship;
         string txt = "Документ #" + billId + "\n";
         txt += "Клієнт: " + consumerName + "\n";
@@ -110,5 +90,44 @@ public class LegacyBillProcessor
         string r = "";
         foreach (var l in _log) r += l + "\n";
         return r;
+    }
+
+    private static decimal Subtotal(List<ServiceLine> lines)
+    {
+        decimal sum = 0m;
+        for (int i = 0; i < lines.Count; i++)
+        {
+            sum += lines[i].Quantity * lines[i].Tariff;
+        }
+        return sum;
+    }
+
+    private static decimal DiscountOf(decimal subtotal,
+        ConsumerKind consumerKind, int consumerDone)
+    {
+        decimal discount = 0m;
+        if (consumerKind == ConsumerKind.Vip)
+        {
+            discount = subtotal * PricingRules.VipRate;
+            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
+        }
+        else if (consumerKind == ConsumerKind.Staff)
+        {
+            discount = subtotal * PricingRules.StaffRate;
+            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
+        }
+        else if (consumerDone > PricingRules.LoyalOrders)
+        {
+            discount = subtotal * PricingRules.LoyalRate;
+            if (discount > PricingRules.MaxDiscount) discount = PricingRules.MaxDiscount;
+        }
+        return discount;
+    }
+
+    private static decimal ShippingOf(decimal payable)
+    {
+        decimal ship = 0m;
+        if (payable < PricingRules.FreeShipFrom) ship = PricingRules.ShipCost;
+        return ship;
     }
 }
