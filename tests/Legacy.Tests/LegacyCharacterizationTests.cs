@@ -121,7 +121,7 @@ public class LegacyCharacterizationTests
         var years = DateTime.Now.Year - 2020;
         var expected = "ІВАН [VIP] [ЛОЯЛЬНИЙ] " +
             "<ivan@mail.com> стаж " + years;
-        var actual = new BillProcessor().DescribeClient(c);
+        var actual = c.Describe();
         Assert.Equal(expected, actual);
     }
 }

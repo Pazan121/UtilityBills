@@ -19,4 +19,14 @@ public sealed class Consumer
 
     public bool IsLoyal =>
         DoneCount > PricingRules.LoyalOrders;
+
+    public string Describe()
+    {
+        var s = Name.Trim().ToUpper();
+        if (Kind == ConsumerKind.Vip) s += " [VIP]";
+        if (IsLoyal) s += " [ЛОЯЛЬНИЙ]";
+        s += " <" + Email.ToLower() + ">";
+        return s + " стаж " +
+            (DateTime.Now.Year - SinceUtc.Year);
+    }
 }
