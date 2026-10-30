@@ -2,16 +2,35 @@ namespace UtilityBills.Legacy;
 
 public sealed class DiscountPolicy
 {
-    public decimal For(decimal subtotal, Consumer client)
+    private readonly IReadOnlyList<IDiscountRule> _rules;
+
+    public DiscountPolicy()
+        : this(new IDiscountRule[]
+        {
+            new VipDiscountRule(),
+            new StaffDiscountRule(),
+            new LoyalDiscountRule(),
+        })
     {
-        decimal rate = RateFor(client);
-        return Math.Min(subtotal * rate, PricingRules.MaxDiscount);
     }
 
-    private static decimal RateFor(Consumer client) => client.Kind switch
+    public DiscountPolicy(IReadOnlyList<IDiscountRule> rules)
     {
-        ConsumerKind.Vip => PricingRules.VipRate,
-        ConsumerKind.Staff => PricingRules.StaffRate,
-        _ => client.IsLoyal ? PricingRules.LoyalRate : 0m,
-    };
+        _rules = rules;
+    }
+
+    public decimal For(decimal subtotal, Consumer client)
+    {
+        return Math.Min(subtotal * RateFor(client), PricingRules.MaxDiscount);
+    }
+
+    private decimal RateFor(Consumer client)
+    {
+        foreach (var rule in _rules)
+        {
+            var rate = rule.RateFor(client);
+            if (rate is not null) return rate.Value;
+        }
+        return 0m;
+    }
 }
