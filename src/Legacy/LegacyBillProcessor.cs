@@ -48,30 +48,10 @@ public class LegacyBillProcessor
     public decimal Preview(ConsumerKind consumerKind, int consumerDone,
         List<ServiceLine> lines)
     {
-        decimal s = 0m;
-        foreach (var it in lines)
-        {
-            s += it.Quantity * it.Tariff;
-        }
-        decimal d = 0m;
-        if (consumerKind == ConsumerKind.Vip)
-        {
-            d = s * PricingRules.VipRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        else if (consumerKind == ConsumerKind.Staff)
-        {
-            d = s * PricingRules.StaffRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        else if (consumerDone > PricingRules.LoyalOrders)
-        {
-            d = s * PricingRules.LoyalRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        decimal sh = 0m;
-        if (s - d < PricingRules.FreeShipFrom) sh = PricingRules.ShipCost;
-        return s - d + sh;
+        decimal subtotal = Subtotal(lines);
+        decimal discount = DiscountOf(subtotal, consumerKind, consumerDone);
+        decimal payable = subtotal - discount;
+        return payable + ShippingOf(payable);
     }
 
     public string DescribeClient(Consumer c)
