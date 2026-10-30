@@ -37,6 +37,6 @@ public sealed class BillCalculator
             rate += BigBillRate;
         }
 
-        return decimal.Round(amount * (1m - rate), 2);
+        return decimal.Ceiling(amount * (1m - rate) * 100m) / 100m;
     }
 }
