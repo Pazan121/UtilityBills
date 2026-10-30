@@ -44,4 +44,17 @@ public class BillCalculatorTests
         // Assert
         Assert.Equal("amount", ex.ParamName);
     }
+
+    [Fact]
+    public void ChargeFor_FractionOfCent_RoundsUp()
+    {
+        // Arrange
+        var calculator = new BillCalculator();
+
+        // Act
+        decimal actual = calculator.ChargeFor(999.99m, true);
+
+        // Assert
+        Assert.Equal(950m, actual);
+    }
 }
