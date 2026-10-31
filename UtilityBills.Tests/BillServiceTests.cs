@@ -66,6 +66,25 @@ public class BillServiceTests
         Assert.Equal("bill.exists", ex.Rule);
     }
 
+    [Fact]
+    public void Place_BillWithoutLines_ThrowsDomainRule()
+    {
+        // Arrange
+        var service = NewService(
+            new FakeBillRepository(),
+            new StubPricingPolicy(1m),
+            new RecordingNotifier());
+        var subscriber = new Subscriber(5, "Іван Іваненко", "Київ", "ivan@example.com");
+        var bill = new UtilityBill(2, 5, "2026-10", new DateOnly(2026, 11, 20));
+
+        // Act
+        var ex = Assert.Throws<DomainRuleException>(
+            () => service.Place(bill, subscriber));
+
+        // Assert
+        Assert.Equal("bill.empty", ex.Rule);
+    }
+
     private static BillService NewService(
         FakeBillRepository repository,
         StubPricingPolicy pricing,
