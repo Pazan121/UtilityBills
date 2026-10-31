@@ -493,3 +493,8 @@ data/*.local.json
 # Журнали й звіти, які створює застосунок
 audit.log
 bill-report.txt
+
+bin/
+obj/
+TestResults/
+coverage/
