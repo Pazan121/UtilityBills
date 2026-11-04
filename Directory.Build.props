@@ -13,6 +13,8 @@
     <VersionPrefix>0.8.0</VersionPrefix>
     <Authors>Римарцов Володимир</Authors>
     <Product>UtilityBills</Product>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
   </PropertyGroup>
 
 </Project>
