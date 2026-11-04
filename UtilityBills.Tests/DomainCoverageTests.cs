@@ -247,8 +247,9 @@ public class DomainCoverageTests
     public void CountValidQuantities_MixedRows_CountsPositiveIntegers()
     {
         int actual = BillService.CountValidQuantities(
-            new[] { "5", "x", "-1", "3", "0" });
-
+#pragma warning disable CA1861
+           new[] { "5", "x", "-1", "3", "0" });
+#pragma warning disable CA1861
         Assert.Equal(2, actual);
     }
 
