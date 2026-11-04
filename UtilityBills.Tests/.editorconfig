@@ -1,0 +1,4 @@
+[*.cs]
+# Імена тестів у форматі Метод_Умова_Результат містять підкреслення (N-14).
+dotnet_diagnostic.CA1707.severity = none
+dotnet_naming_rule.members_should_be_pascal_case.severity = none
