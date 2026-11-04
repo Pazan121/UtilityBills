@@ -1,0 +1,2 @@
+# Кінці рядків C# — CRLF на будь-якій машині (узгоджено з end_of_line = crlf у .editorconfig).
+*.cs text eol=crlf
