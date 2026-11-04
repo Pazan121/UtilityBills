@@ -1,4 +1,6 @@
 # UtilityBills
+
+![CI](https://github.com/Pazan121/UtilityBills/actions/workflows/ci.yml/badge.svg)
 Навчальний проєкт з дисципліни «Конструювання програмного забезпечення».
 Варіант № 14: нарахування комунальних платежів.
 ## Склад рішення
