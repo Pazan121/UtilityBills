@@ -242,16 +242,15 @@ public class DomainCoverageTests
 
         Assert.Equal("bill.editable", ex.Rule);
     }
-
+#pragma warning disable CA1861
     [Fact]
     public void CountValidQuantities_MixedRows_CountsPositiveIntegers()
     {
         int actual = BillService.CountValidQuantities(
             new[] { "5", "x", "-1", "3", "0" });
-
         Assert.Equal(2, actual);
     }
-
+#pragma warning disable CA1861
     [Fact]
     public void BuildCsv_OneBill_ContainsHeaderAndRow()
     {
