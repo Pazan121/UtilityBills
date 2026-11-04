@@ -1,25 +1,50 @@
 # UtilityBills
+
+![CI](https://github.com/Pazan121/UtilityBills/actions/workflows/ci.yml/badge.svg)
+
 Навчальний проєкт з дисципліни «Конструювання програмного забезпечення».
 Варіант № 14: нарахування комунальних платежів.
+
 ## Склад рішення
-- `UtilityBills.Core` — бібліотека з моделлю предметної області.
+
+- `UtilityBills.Core` — бібліотека з моделлю предметної області та сервісами.
 - `UtilityBills.App` — консольний застосунок для демонстрації моделі.
+- `UtilityBills.Tests` — модульні тести (xUnit).
+
 ## Вимоги
+
 .NET SDK 8.0 або новіший, Git.
+
 ## Складання та запуск
-```bash
+
+```
 dotnet build
 dotnet run --project UtilityBills.App
 ```
+
 ## Стандарт кодування
+
 Правила описано у `CODING_STANDARD.md` і закріплено в `.editorconfig`.
 Перевірка форматування: `dotnet format --verify-no-changes`.
-## Обробка помилок і журнал
 
-- Помилки класифіковано в `docs/errors.md`.
-- Введення перевіряє `BillLineParser` (App) і повертає `Result<UtilityBillLine>`; ядро (`Core`) приймає лише типізовані дані.
-- Порушення правил предметної області — `DomainRuleException` з полем `Rule`.
-- Журнал: `ILogger` у `BillService`, у консолі застосунку — `AddSimpleConsole` з областями (`BeginScope`).
-- Аудит дій пишеться в `audit.log` (`FileAuditLog`, `IDisposable`); файл у репозиторій не потрапляє.
+## Безперервна інтеграція
+
+Конвеєр `.github/workflows/ci.yml` запускається на кожен push у `main` і `feature/**`
+та на кожен pull request у `main`. Зміна потрапляє в `main`, лише якщо виконано всі критерії якості:
+
+| Крок конвеєра | Команда | Що ламає збірку |
+| --- | --- | --- |
+| Формат | `dotnet format --verify-no-changes` | зайвий пробіл, відступ |
+| Складання | `dotnet build -c Release` | будь-яке попередження CS, CA, SA |
+| Тести | `dotnet test -c Release` | хоча б один червоний тест |
+| Покриття | `/p:Threshold=60` | покриття рядків нижче за 60 % |
+
+Зламана збірка — найвищий пріоритет: поки `main` червона, нову задачу не починають.
+
+## Версія
+
+Поточна версія — `0.8.0` (задається в `Directory.Build.props`, виводиться застосунком першим рядком).
+
 ## Автор
+
 Римарцов Володимир Володимирович, група 471.

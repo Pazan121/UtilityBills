@@ -6,12 +6,12 @@ namespace UtilityBills.Core.Pricing;
 /// <summary>Політика для пільгових абонентів: знижка 10 %.</summary>
 public sealed class PrivilegedPricingPolicy : IPricingPolicy
 {
-    private const decimal Factor = 0.90m;
+    private const decimal _factor = 0.90m;
 
     /// <inheritdoc/>
     public decimal PriceOf(UtilityBillLine line)
     {
         ArgumentNullException.ThrowIfNull(line);
-        return Math.Round(line.Amount * Factor, 2);
+        return Math.Round(line.Amount * _factor, 2);
     }
 }

@@ -2,6 +2,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using UtilityBills.App;
+using UtilityBills.Core;
 using UtilityBills.Core.Abstractions;
 using UtilityBills.Core.Auditing;
 using UtilityBills.Core.Domain;
@@ -9,6 +10,8 @@ using UtilityBills.Core.Errors;
 using UtilityBills.Core.Pricing;
 using UtilityBills.Core.Services;
 using UtilityBills.Core.Storage;
+
+Console.WriteLine($"UtilityBills v{VersionInfo.Current()}");
 
 using ILoggerFactory factory = LoggerFactory.Create(builder =>
 {

@@ -6,7 +6,7 @@ namespace UtilityBills.Core.Pricing;
 /// <summary>Політика з постійним відсотком знижки.</summary>
 public sealed class DiscountPricingPolicy : IPricingPolicy
 {
-    private const decimal MaxRate = 0.5m;
+    private const decimal _maxRate = 0.5m;
 
     private readonly decimal _rate;
 
@@ -16,7 +16,7 @@ public sealed class DiscountPricingPolicy : IPricingPolicy
     /// <param name="rate">Частка знижки від 0 до 0,5.</param>
     public DiscountPricingPolicy(decimal rate)
     {
-        if (rate < 0m || rate > MaxRate)
+        if (rate < 0m || rate > _maxRate)
         {
             throw new ArgumentOutOfRangeException(nameof(rate));
         }
