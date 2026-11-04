@@ -31,4 +31,10 @@ public sealed class ReportBuilder
 
         return text.ToString();
     }
+
+        public string Describe(int count)
+    {
+        string note;
+        return "Позицій: " + count;
+    }
 }
