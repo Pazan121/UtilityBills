@@ -10,7 +10,7 @@ namespace UtilityBills.Tests;
 
 public class BillServiceScenarioTests
 {
-    private static readonly Subscriber Owner =
+    private static readonly Subscriber _owner =
         new(1, "Абонент 001", "Київ, вул. Вишнева, 1", "a1@example.com");
 
     [Fact]
@@ -73,7 +73,7 @@ public class BillServiceScenarioTests
             new CeilingPricingPolicy(),
             new SpyNotifier(),
             NullLogger<BillService>.Instance);
-        var bill = new UtilityBill(1, Owner.Id, "2026-10", new DateOnly(2026, 11, 20));
+        var bill = new UtilityBill(1, _owner.Id, "2026-10", new DateOnly(2026, 11, 20));
         bill.AddLine(new UtilityBillLine(1, 10m, 2.64m));
         repository.Add(bill);
         return (service, bill);

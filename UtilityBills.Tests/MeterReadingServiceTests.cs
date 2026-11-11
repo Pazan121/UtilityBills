@@ -8,7 +8,7 @@ namespace UtilityBills.Tests;
 
 public class MeterReadingServiceTests
 {
-    private static readonly DateOnly Today = new(2026, 11, 1);
+    private static readonly DateOnly _today = new(2026, 11, 1);
 
     [Fact]
     public void Submit_ValidReading_StoresIt()
@@ -50,7 +50,7 @@ public class MeterReadingServiceTests
         var service = NewService(new FakeMeterReadings());
 
         var ex = Assert.Throws<DomainRuleException>(
-            () => service.Submit(1, 1, Today.AddDays(1), 10m));
+            () => service.Submit(1, 1, _today.AddDays(1), 10m));
 
         Assert.Equal("reading.future", ex.Rule);
     }
@@ -95,7 +95,7 @@ public class MeterReadingServiceTests
         return new MeterReadingService(
             readings,
             new FakeReferenceData(),
-            new FixedClock(Today),
+            new FixedClock(_today),
             NullLogger<MeterReadingService>.Instance);
     }
 }

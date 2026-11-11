@@ -5,9 +5,9 @@ namespace UtilityBills.Core.Billing;
 /// <param name="Tariff">Тариф сходинки, грн за одиницю.</param>
 public sealed record TariffStepCharge(decimal Quantity, decimal Tariff)
 {
-    private const decimal CentsInHryvnia = 100m;
+    private const decimal _centsInHryvnia = 100m;
 
     /// <summary>Gets the вартість сходинки, округлену до 0,01 грн угору.</summary>
     public decimal Amount =>
-        decimal.Ceiling(Quantity * Tariff * CentsInHryvnia) / CentsInHryvnia;
+        decimal.Ceiling(Quantity * Tariff * _centsInHryvnia) / _centsInHryvnia;
 }

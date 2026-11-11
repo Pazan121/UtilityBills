@@ -9,7 +9,7 @@ namespace UtilityBills.Core.Services;
 /// <summary>Сценарій UC-02: нарахувати платіж за двома останніми показниками.</summary>
 public sealed class ChargeService
 {
-    private const int MinimumReadings = 2;
+    private const int _minimumReadings = 2;
 
     private readonly IMeterReadingRepository _readings;
     private readonly IReferenceData _reference;
@@ -50,7 +50,7 @@ public sealed class ChargeService
                 $"Абонента {subscriberId} не знайдено");
         EnsureServiceExists(utilityServiceId);
         IReadOnlyList<MeterReading> history = _readings.GetFor(subscriberId, utilityServiceId);
-        if (history.Count < MinimumReadings)
+        if (history.Count < _minimumReadings)
         {
             throw new DomainRuleException(
                 "charge.readings",
