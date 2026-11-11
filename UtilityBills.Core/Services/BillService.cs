@@ -36,6 +36,29 @@ public sealed class BillService
         _log = log;
     }
 
+    /// <summary>Рахує рядки, що є цілими числами більше нуля.</summary>
+    /// <param name="rows">Рядки введення.</param>
+    /// <returns>Кількість коректних значень.</returns>
+    public static int CountValidQuantities(string[] rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        int valid = 0;
+        foreach (string row in rows)
+        {
+            if (int.TryParse(
+                row,
+                NumberStyles.Integer,
+                CultureInfo.CurrentCulture,
+                out int quantity)
+            && quantity > 0)
+            {
+                valid++;
+            }
+        }
+
+        return valid;
+    }
+
     /// <summary>Виставляє рахунок, зберігає його та сповіщає абонента.</summary>
     /// <param name="bill">Рахунок у стані чернетки.</param>
     /// <param name="subscriber">Абонент, якому належить рахунок.</param>
