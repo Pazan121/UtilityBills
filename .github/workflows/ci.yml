@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, 'feature/**' ]
+    branches: [ main, 'feature/**', 'ci-demo' ]
   pull_request:
     branches: [ main ]
 
@@ -24,19 +24,26 @@ jobs:
       - name: Перевірка форматування
         run: dotnet format --verify-no-changes --no-restore
 
-      - name: Складання Release з аналізаторами
-        run: dotnet build -c Release --no-restore
+      - name: Складання Release без попереджень
+        run: dotnet build -c Release --no-restore -warnaserror
 
-      - name: Тести й покриття
-        run: >
-          dotnet test -c Release --no-restore
-          /p:CollectCoverage=true
-          /p:CoverletOutputFormat=cobertura
-          /p:Threshold=60 /p:ThresholdType=line
+      - name: Тести
+        run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory ./TestResults
+
+      - name: Поріг покриття 70 %
+        shell: bash
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator "-reports:TestResults/**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary;Cobertura"
+          cat coverage/Summary.txt
+          LINE=$(grep -oP 'Line coverage: \K[0-9.]+' coverage/Summary.txt)
+          echo "Рядкове покриття: $LINE %"
+          awk -v v="$LINE" 'BEGIN { exit (v >= 70) ? 0 : 1 }'
 
       - name: Зберегти звіт про покриття
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage
-          path: '**/coverage.cobertura.xml'
+          path: coverage/
