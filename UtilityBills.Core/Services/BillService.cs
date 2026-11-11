@@ -36,29 +36,6 @@ public sealed class BillService
         _log = log;
     }
 
-    /// <summary>Рахує рядки, що є цілими числами більше нуля.</summary>
-    /// <param name="rows">Рядки введення.</param>
-    /// <returns>Кількість коректних значень.</returns>
-    public static int CountValidQuantities(string[] rows)
-    {
-        ArgumentNullException.ThrowIfNull(rows);
-        int valid = 0;
-        foreach (string row in rows)
-        {
-            if (int.TryParse(
-                    row,
-                    NumberStyles.Integer,
-                    CultureInfo.CurrentCulture,
-                    out int quantity)
-                && quantity > 0)
-            {
-                valid++;
-            }
-        }
-
-        return valid;
-    }
-
     /// <summary>Виставляє рахунок, зберігає його та сповіщає абонента.</summary>
     /// <param name="bill">Рахунок у стані чернетки.</param>
     /// <param name="subscriber">Абонент, якому належить рахунок.</param>
@@ -186,26 +163,6 @@ public sealed class BillService
         catch (IOException ex)
         {
             _log.LogError(ex, "Збій сховища, {BillId}", billId);
-            throw;
-        }
-    }
-
-    /// <summary>Записує звіт у файл; потік закривається навіть при винятку.</summary>
-    /// <param name="path">Шлях до файлу.</param>
-    /// <param name="bill">Рахунок.</param>
-    public void ExportReport(string path, UtilityBill bill)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        ArgumentNullException.ThrowIfNull(bill);
-        try
-        {
-            using StreamWriter writer = new(path);
-            writer.WriteLine($"Рахунок {bill.Id}");
-            writer.WriteLine(TotalOf(bill).ToString("0.00", CultureInfo.CurrentCulture));
-        }
-        catch (IOException ex)
-        {
-            _log.LogError(ex, "Не вдалося записати звіт {Path}", path);
             throw;
         }
     }
