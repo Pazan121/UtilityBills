@@ -1,0 +1,26 @@
+[
+  {
+    "SubscriberId": 1,
+    "UtilityServiceId": 1,
+    "ReadingDate": "2026-09-01",
+    "Value": 1000
+  },
+  {
+    "SubscriberId": 1,
+    "UtilityServiceId": 1,
+    "ReadingDate": "2026-10-01",
+    "Value": 1130
+  },
+  {
+    "SubscriberId": 7,
+    "UtilityServiceId": 1,
+    "ReadingDate": "2026-09-01",
+    "Value": 1000
+  },
+  {
+    "SubscriberId": 7,
+    "UtilityServiceId": 1,
+    "ReadingDate": "2026-10-01",
+    "Value": 1130
+  }
+]
