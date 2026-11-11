@@ -4,8 +4,8 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <!-- Застарілий навмисно поганий код ЛР3/ЛР4: не вимірюємо, підлягає видаленню -->
-          <ExcludeByFile>**/Legacy/**/*.cs</ExcludeByFile>
+          <!-- Межа вимірювання: домен і прикладний шар. Поза межами: інфраструктура та Legacy. -->
+          <ExcludeByFile>**/Infrastructure/**/*.cs,**/Storage/**/*.cs,**/Auditing/**/*.cs,**/Legacy/**/*.cs</ExcludeByFile>
         </Configuration>
       </DataCollector>
     </DataCollectors>
