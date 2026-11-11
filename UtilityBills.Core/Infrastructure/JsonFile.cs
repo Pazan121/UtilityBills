@@ -7,7 +7,7 @@ namespace UtilityBills.Core.Infrastructure;
 /// <summary>Читання й запис JSON-файлів; помилки диска стають винятками домену.</summary>
 public static class JsonFile
 {
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions _options = new()
     {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() },
@@ -27,7 +27,7 @@ public static class JsonFile
         try
         {
             string json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<T>>(json, Options) ?? new List<T>();
+            return JsonSerializer.Deserialize<List<T>>(json, _options) ?? new List<T>();
         }
         catch (IOException ex)
         {
@@ -47,7 +47,7 @@ public static class JsonFile
     {
         try
         {
-            File.WriteAllText(path, JsonSerializer.Serialize(items, Options));
+            File.WriteAllText(path, JsonSerializer.Serialize(items, _options));
         }
         catch (IOException ex)
         {

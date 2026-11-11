@@ -5,9 +5,9 @@ namespace UtilityBills.Core.Infrastructure;
 
 internal sealed class FileLogger : ILogger
 {
-    private const string TimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
+    private const string _timeFormat = "yyyy-MM-dd HH:mm:ss.fff";
 
-    private static readonly AsyncLocal<string?> CurrentScenario = new();
+    private static readonly AsyncLocal<string?> _currentScenario = new();
 
     private readonly string _category;
     private readonly Action<string> _sink;
@@ -21,8 +21,8 @@ internal sealed class FileLogger : ILogger
     public IDisposable? BeginScope<TState>(TState state)
         where TState : notnull
     {
-        string? previous = CurrentScenario.Value;
-        CurrentScenario.Value = state.ToString();
+        string? previous = _currentScenario.Value;
+        _currentScenario.Value = state.ToString();
         return new ScenarioRestorer(previous);
     }
 
@@ -43,8 +43,8 @@ internal sealed class FileLogger : ILogger
             return;
         }
 
-        string scenario = CurrentScenario.Value ?? _category;
-        string stamp = DateTime.Now.ToString(TimeFormat, CultureInfo.InvariantCulture);
+        string scenario = _currentScenario.Value ?? _category;
+        string stamp = DateTime.Now.ToString(_timeFormat, CultureInfo.InvariantCulture);
         string line = $"{stamp} [{logLevel}] {scenario}: {formatter(state, exception)}";
         _sink(exception is null ? line : $"{line} | {exception.GetType().Name}");
     }
@@ -60,7 +60,7 @@ internal sealed class FileLogger : ILogger
 
         public void Dispose()
         {
-            CurrentScenario.Value = _previous;
+            _currentScenario.Value = _previous;
         }
     }
 }

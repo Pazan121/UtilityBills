@@ -6,9 +6,9 @@ namespace UtilityBills.Core.Infrastructure;
 /// <summary>Умовні довідники: 60 абонентів у 12 будинках та одна послуга.</summary>
 public sealed class SeedReferenceData : IReferenceData
 {
-    private const int SubscriberCount = 60;
-    private const int SubscribersPerHouse = 5;
-    private const int PrivilegedEvery = 7;
+    private const int _subscriberCount = 60;
+    private const int _subscribersPerHouse = 5;
+    private const int _privilegedEvery = 7;
 
     private readonly List<Subscriber> _subscribers = new();
     private readonly UtilityService _electricity = new(1, "Електроенергія", 2.64m);
@@ -16,15 +16,15 @@ public sealed class SeedReferenceData : IReferenceData
     /// <summary>Initializes a new instance of the <see cref="SeedReferenceData"/> class.</summary>
     public SeedReferenceData()
     {
-        for (int number = 1; number <= SubscriberCount; number++)
+        for (int number = 1; number <= _subscriberCount; number++)
         {
-            int house = ((number - 1) / SubscribersPerHouse) + 1;
+            int house = ((number - 1) / _subscribersPerHouse) + 1;
             _subscribers.Add(new Subscriber(
                 number,
                 $"Абонент {number:000}",
                 $"Київ, вул. Вишнева, {house}",
                 $"abonent{number}@example.com",
-                number % PrivilegedEvery == 0));
+                number % _privilegedEvery == 0));
         }
     }
 

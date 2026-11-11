@@ -8,10 +8,10 @@ namespace UtilityBills.App;
 
 internal sealed class Menu
 {
-    private const int PaymentTermDays = 20;
-    private const string DateFormat = "yyyy-MM-dd";
+    private const int _paymentTermDays = 20;
+    private const string _dateFormat = "yyyy-MM-dd";
 
-    private static readonly string[] MenuLines =
+    private static readonly string[] _menuLines =
     {
         "1. Внести показник лічильника",
         "2. Нарахувати платіж",
@@ -41,7 +41,7 @@ internal sealed class Menu
         {
             while (true)
             {
-                foreach (string line in MenuLines)
+                foreach (string line in _menuLines)
                 {
                     _output.WriteLine(line);
                 }
@@ -133,7 +133,7 @@ internal sealed class Menu
     {
         int subscriberId = ReadInt("Абонент (№): ");
         int serviceId = ReadInt("Послуга (№): ");
-        DateOnly due = _services.Clock.Today.AddDays(PaymentTermDays);
+        DateOnly due = _services.Clock.Today.AddDays(_paymentTermDays);
         UtilityBill bill = _services.Charges.Charge(subscriberId, serviceId, due);
         decimal total = _services.Bills.TotalOf(bill);
         _output.WriteLine($"Рахунок {bill.Id}, період {bill.BillingPeriod}: {Format(total)} грн");
@@ -240,7 +240,7 @@ internal sealed class Menu
         {
             string text = ReadText(prompt);
             DateOnly value;
-            if (DateOnly.TryParseExact(text, DateFormat, culture, DateTimeStyles.None, out value))
+            if (DateOnly.TryParseExact(text, _dateFormat, culture, DateTimeStyles.None, out value))
             {
                 return value;
             }

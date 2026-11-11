@@ -10,7 +10,7 @@ namespace UtilityBills.Tests;
 
 public class ChargeServiceTests
 {
-    private static readonly DateOnly DueDate = new(2026, 11, 20);
+    private static readonly DateOnly _dueDate = new(2026, 11, 20);
 
     [Fact]
     public void Charge_TwoReadings_IssuesBillWithStepCharge()
@@ -18,7 +18,7 @@ public class ChargeServiceTests
         var fixture = new Fixture();
         fixture.AddReadings(1, 1000m, 1130m);
 
-        var bill = fixture.Charges.Charge(1, 1, DueDate);
+        var bill = fixture.Charges.Charge(1, 1, _dueDate);
 
         Assert.Equal(BillStatus.Issued, bill.Status);
         Assert.Equal(2, bill.Lines.Count);
@@ -31,7 +31,7 @@ public class ChargeServiceTests
         var fixture = new Fixture();
         fixture.AddReadings(7, 1000m, 1130m);
 
-        var bill = fixture.Charges.Charge(7, 1, DueDate);
+        var bill = fixture.Charges.Charge(7, 1, _dueDate);
 
         Assert.Equal(231m, fixture.Bills.TotalOf(bill));
     }
@@ -43,7 +43,7 @@ public class ChargeServiceTests
         fixture.Readings.Add(new MeterReading(1, 1, new DateOnly(2026, 10, 1), 1000m));
 
         var ex = Assert.Throws<DomainRuleException>(
-            () => fixture.Charges.Charge(1, 1, DueDate));
+            () => fixture.Charges.Charge(1, 1, _dueDate));
 
         Assert.Equal("charge.readings", ex.Rule);
     }
@@ -55,7 +55,7 @@ public class ChargeServiceTests
         fixture.AddReadings(1, 1000m, 1000m);
 
         var ex = Assert.Throws<DomainRuleException>(
-            () => fixture.Charges.Charge(1, 1, DueDate));
+            () => fixture.Charges.Charge(1, 1, _dueDate));
 
         Assert.Equal("bill.empty", ex.Rule);
     }
@@ -66,7 +66,7 @@ public class ChargeServiceTests
         var fixture = new Fixture();
 
         var ex = Assert.Throws<DomainRuleException>(
-            () => fixture.Charges.Charge(99, 1, DueDate));
+            () => fixture.Charges.Charge(99, 1, _dueDate));
 
         Assert.Equal("subscriber.exists", ex.Rule);
     }
@@ -76,7 +76,7 @@ public class ChargeServiceTests
     {
         var fixture = new Fixture();
         fixture.AddReadings(1, 1000m, 1130m);
-        var bill = fixture.Charges.Charge(1, 1, DueDate);
+        var bill = fixture.Charges.Charge(1, 1, _dueDate);
 
         fixture.Bills.Pay(bill.Id, 363m);
 
@@ -88,7 +88,7 @@ public class ChargeServiceTests
     {
         var fixture = new Fixture();
         fixture.AddReadings(1, 1000m, 1130m);
-        var bill = fixture.Charges.Charge(1, 1, DueDate);
+        var bill = fixture.Charges.Charge(1, 1, _dueDate);
 
         fixture.Bills.Cancel(bill.Id, "помилкові показники");
 
@@ -101,7 +101,7 @@ public class ChargeServiceTests
         var fixture = new Fixture();
         fixture.AddReadings(1, 1000m, 1130m);
 
-        fixture.Charges.Charge(1, 1, DueDate);
+        fixture.Charges.Charge(1, 1, _dueDate);
 
         Assert.Single(fixture.Notifier.Messages);
     }

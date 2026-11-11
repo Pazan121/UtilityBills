@@ -46,9 +46,9 @@ public class BillSearchServiceTests
 
         var found = service.Find(null, null);
 
-        Assert.Equal(ExpectedBillIds, found.Select(bill => bill.Id).ToArray());
+        Assert.Equal(_expectedBillIds, found.Select(bill => bill.Id).ToArray());
     }
-    private static readonly int[] ExpectedBillIds = [1, 2, 3];
+    private static readonly int[] _expectedBillIds = [1, 2, 3];
     private static BillSearchService NewServiceWithThreeBills()
     {
         var repository = new InMemoryBillRepository();

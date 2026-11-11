@@ -6,19 +6,19 @@ namespace UtilityBills.Tests;
 
 public class ArchitectureTests
 {
-    private const BindingFlags AllMembers = BindingFlags.Public | BindingFlags.NonPublic
+    private const BindingFlags _allMembers = BindingFlags.Public | BindingFlags.NonPublic
         | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-    private static readonly Assembly Core = typeof(UtilityBill).Assembly;
+    private static readonly Assembly _core = typeof(UtilityBill).Assembly;
 
-    private static readonly string[] ApplicationLayer =
+    private static readonly string[] _applicationLayer =
     {
         "UtilityBills.Core.Abstractions", "UtilityBills.Core.Billing", "UtilityBills.Core.Pricing",
         "UtilityBills.Core.Services", "UtilityBills.Core.Reporting", "UtilityBills.Core.Errors",
         "UtilityBills.Core.Parsing",
     };
 
-    private static readonly string[] InfrastructureLayer =
+    private static readonly string[] _infrastructureLayer =
     {
         "UtilityBills.Core.Infrastructure",
         "UtilityBills.Core.Storage",
@@ -40,8 +40,8 @@ public class ArchitectureTests
     [Fact]
     public void Application_DoesNotDependOnInfrastructure()
     {
-        var violations = DependenciesOf(ns => ApplicationLayer.Contains(ns))
-            .Where(ns => InfrastructureLayer.Contains(ns))
+        var violations = DependenciesOf(ns => _applicationLayer.Contains(ns))
+            .Where(ns => _infrastructureLayer.Contains(ns))
             .Distinct()
             .ToList();
 
@@ -50,7 +50,7 @@ public class ArchitectureTests
 
     private static IEnumerable<string> DependenciesOf(Func<string, bool> inLayer)
     {
-        IEnumerable<Type> layerTypes = Core.GetTypes()
+        IEnumerable<Type> layerTypes = _core.GetTypes()
             .Where(type => type.Namespace is not null && inLayer(type.Namespace));
         foreach (Type type in layerTypes)
         {
@@ -76,18 +76,18 @@ public class ArchitectureTests
             yield return contract;
         }
 
-        foreach (FieldInfo field in type.GetFields(AllMembers))
+        foreach (FieldInfo field in type.GetFields(_allMembers))
         {
             yield return field.FieldType;
         }
 
-        foreach (PropertyInfo property in type.GetProperties(AllMembers))
+        foreach (PropertyInfo property in type.GetProperties(_allMembers))
         {
             yield return property.PropertyType;
         }
 
-        foreach (MethodBase method in type.GetMethods(AllMembers).Cast<MethodBase>()
-            .Concat(type.GetConstructors(AllMembers)))
+        foreach (MethodBase method in type.GetMethods(_allMembers).Cast<MethodBase>()
+            .Concat(type.GetConstructors(_allMembers)))
         {
             foreach (ParameterInfo parameter in method.GetParameters())
             {

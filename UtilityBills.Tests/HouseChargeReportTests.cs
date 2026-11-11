@@ -6,13 +6,13 @@ namespace UtilityBills.Tests;
 
 public class HouseChargeReportTests
 {
-    private const string House = "Київ, вул. Вишнева, 1";
+    private const string _house = "Київ, вул. Вишнева, 1";
 
     [Fact]
     public void Build_NoBillsInHouse_SaysThereAreNone()
     {
         var text = HouseChargeReport.Build(
-            House, new FakeReferenceData().GetSubscribers(), Array.Empty<UtilityBill>(), _ => 0m);
+            _house, new FakeReferenceData().GetSubscribers(), Array.Empty<UtilityBill>(), _ => 0m);
 
         Assert.Contains("Рахунків немає.", text, StringComparison.Ordinal);
     }
@@ -23,7 +23,7 @@ public class HouseChargeReportTests
         var bills = new[] { NewBill(1, 1) };
 
         var text = HouseChargeReport.Build(
-            House, new FakeReferenceData().GetSubscribers(), bills, _ => 363m);
+            _house, new FakeReferenceData().GetSubscribers(), bills, _ => 363m);
 
         Assert.Contains("Абонент 001: 363.00", text, StringComparison.Ordinal);
         Assert.Contains("Разом: 363.00 (1 рах.)", text, StringComparison.Ordinal);
@@ -35,7 +35,7 @@ public class HouseChargeReportTests
         var bills = new[] { NewBill(1, 2), NewBill(2, 1), NewBill(3, 7) };
 
         var text = HouseChargeReport.Build(
-            House, new FakeReferenceData().GetSubscribers(), bills, _ => 100m);
+            _house, new FakeReferenceData().GetSubscribers(), bills, _ => 100m);
 
         Assert.True(
             text.IndexOf("Абонент 001", StringComparison.Ordinal)
